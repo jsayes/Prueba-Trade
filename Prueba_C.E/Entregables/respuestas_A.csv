@@ -1,0 +1,9 @@
+Pregunta;Respuesta;Explicación
+A1 Venta neta de agosto;"select * from vista_ventas;";Muestra los campos que solicitaron, antes se genero una vista temporal con filtros necesarios.
+A2  ¿Cuál es la venta neta total del 1 al 21;193416835;Se incluyeron las facturas válidas y se excluyeron las canceladas, porque las canceladas no son ventas reales.
+A3 ¿cuántos documentos de venta no deberían contarse?;50;Son transacciones canceladas que no generan ingresos.
+A4 ¿cuántas líneas de factura necesitan un ajuste antes de sumarse con las demas?;224;El valor costo es menor al valor de stock, por lo que se deben de revisar si es por promocionales u otro objetivo.
+A5 ¿cuántas filas de inventario_regional sobran?;225;Las de valor sumatoria stock
+A6 ¿hay bodegas en los que el inventario no es confiable?;GT1CEDI: 15 al 17 de agosto. GT1TRAN: 21 de agosto. GT2COMER ;15 al 17 de agosto no hay carga de datos, sin registro. El 21 de agosto veo un variación drástica y GT2COMER solo veo un registro.
+A7 ¿Qué monto de notas de credito corresponde a facturas emitiadas antes de agosto?;2,322,769.28;Si se restan en agosto.
+A8 ¿si haces el join con el catalogo sin revisar nada?;-57125;Porque se omiten la devoluciones, notas de credio, se incluyen documentos cancelados, es decir no tiene filtros.
