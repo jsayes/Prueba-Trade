@@ -1,6 +1,6 @@
 Pregunta;Respuesta;Explicación
 A1 Venta neta de agosto;"select * from vista_ventas;";Muestra los campos que solicitaron, antes se genero una vista temporal con filtros necesarios.
-A2  ¿Cuál es la venta neta total del 1 al 21;193416835;Se incluyeron las facturas válidas y se excluyeron las canceladas, porque las canceladas no son ventas reales.
+A2  ¿Cuál es la venta neta total del 1 al 21;129,870,049.08;Se incluyeron las facturas válidas y se excluyeron las canceladas, porque las canceladas no son ventas reales.
 A3 ¿cuántos documentos de venta no deberían contarse?;50;Son transacciones canceladas que no generan ingresos.
 A4 ¿cuántas líneas de factura necesitan un ajuste antes de sumarse con las demas?;224;El valor costo es menor al valor de stock, por lo que se deben de revisar si es por promocionales u otro objetivo.
 A5 ¿cuántas filas de inventario_regional sobran?;225;Las de valor sumatoria stock
