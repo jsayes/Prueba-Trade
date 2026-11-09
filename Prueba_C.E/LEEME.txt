@@ -1,0 +1,201 @@
+PRUEBA TÉCNICA – CIENTÍFICO DE DATOS JUNIOR – SLC
+__________
+
+1. CONTEXTO
+
+SLC distribuye tecnología, Compras y Comercial necesitan saber
+qué productos se van a quedar sin inventario y dónde se pierde dinero.
+Tienes 48 horas para trabajar con datos ficticios de SAP B1 de agosto
+de 2026 (ventas e inventario).
+
+La prueba tiene tres fases:
+
+  Fase 1 – Cuestionario de criterio   En casa,  con tiempo     30 min    15%
+  Fase 2 – Caso práctico (este doc.)  En casa                  48 horas  55%
+  Fase 3 – Entrevista 2               Videollamada, sin IA     45 min    30%
+
+TU ENTREGA SE DEBATE EN LA ENTREVISTA 2
+Todo lo que entregues en la fase 2 se revisará y discutirá en vivo con el candidato.
+Tendrás que explicar cada decisión, defender tus números y modificar tu
+propio código frente al panel, sin asistentes de IA. Una entrega que no
+puedas explicar no suma puntos, aunque los resultados sean acertivos.
+
+USO DE INTELIGENCIA ARTIFICIAL
+Puedes usar asistentes de IA en la fase 2. A cambio, debes entregar un
+archivo USO_IA.md que diga qué herramienta usaste, para qué partes y qué
+corregiste de lo que te propuso. 
+
+REGLAS GENERALES
+- Si una pregunta no define una métrica, definirla y
+  justifícala.
+- Algunas instrucciones son ambiguas a propósito. Escribe tus supuestos en
+  el README o pregunta por correo durante las primeras 12 horas.
+- Los datos tienen errores, como cualquier base real. Encontrarlos y
+  explicarlos es parte de la evaluación.
+
+
+2. DATOS ENTREGADOS (carpeta "datos" del ZIP)
+
+Las ventas y el inventario cubren del 1 al 21 de agosto de 2026.
+
+  oinv.parquet                 Facturas – encabezado
+                               (DocEntry, DocDate, Canceled, DocSubType,
+                               DocCur, DocRate). DocSubType 'DN' = nota de débito.
+  inv1.parquet                 Facturas – detalle
+                               (DocEntry, LineNum, ItemCode, WhsCode,
+                               U_Ubicacion, Quantity, LineTotal,
+                               StockValue = costo, GrssProfit)
+  orin.parquet                 Notas de crédito – encabezado
+                               (DocEntry, DocDate, Canceled)
+  rin1.parquet                 Notas de crédito – detalle
+                               (mismas columnas que inv1 + BaseEntry =
+                               factura que origina la devolución)
+  oitm.parquet                 Catálogo de productos
+                               (ItemCode, InvntryUom, ItmsGrpCod,
+                               U_Familia, U_SubFamilia, U_Segmento)
+  oitb.parquet                 Grupos de productos (ItmsGrpCod, GrupoArticulo)
+  owhs.parquet                 Bodegas (WhsCode, WhsName, Canal)
+  obin.parquet                 Ubicaciones (AbsEntry, Ubicacion, WhsCode, Canal)
+  inventario_regional.parquet  Inventario diario (DataMartDate, Canal,
+                               Ubicacion, CodigoAlmacen, GrupoArticulo, SKU,
+                               sum_Stock, sum_Comprometido, sum_Pedido,
+                               sum_CostoTotal en GTQ)
+  etiquetas_train.csv          Combinaciones con respuesta conocida (Parte C)
+  combos_a_predecir.csv        Combinaciones que debes predecir (Parte C)
+
+Notas del negocio:
+- El código SKU está en oitm.InvntryUom, no en ItemCode. El inventario usa
+  ese mismo SKU.
+- El canal de una venta es el de la ubicación (obin.Canal), no el de la bodega.
+- inv1.U_Ubicacion se relaciona con obin.AbsEntry.
+- La moneda de SLC es el quetzal. Reporta todos los montos en GTQ.
+
+
+3. PARTE A – SQL Y CALIDAD DE DATOS 
+
+Responde cada pregunta con un número exacto en el archivo respuestas_A.csv
+(columnas: pregunta, respuesta, explicacion). No redondees.
+
+A1. SQL. Escribe en ventas.sql (SQL Server) la consulta que devuelve la
+    venta neta de agosto por línea de documento: facturas y notas de débito
+    en positivo, notas de crédito en negativo, con SKU, grupo de artículo,
+    bodega, canal y ubicación. Luego reprodúcela en Python. No hay
+    plantilla: diseña tú los joins y los filtros.
+
+A2. ¿Cuál es la venta neta total del 1 al 21 de agosto, en GTQ y con dos
+    decimales? Explica qué incluiste, qué excluiste y por qué.
+
+A3. ¿Cuántos documentos de venta no deberían contarse? Indica cuántos son y
+    cómo los identificaste.
+
+A4. ¿Cuántas líneas de factura necesitan un ajuste antes de sumarse con las
+    demás? ¿Cuál es su monto correcto en GTQ?
+
+A5. ¿Cuántas filas de inventario_regional sobran? Explica qué criterio usaste
+    para decidir cuál conservar.
+
+A6. ¿Hay bodegas o días en los que el inventario no es confiable? Indica
+    cuáles y cómo afectan tu cálculo de stock.
+
+A7. ¿Qué monto de notas de crédito corresponde a facturas emitidas antes de
+    agosto? ¿Deberían restarse de la venta de agosto? Justifica.
+
+A8. Si haces el join con el catálogo sin revisar nada, ¿cuánto cambia la
+    venta neta? ¿Por qué?
+
+Si encuentras otros problemas de calidad, documéntalos en el README:
+suman puntos.
+
+
+4. PARTE B – ANÁLISIS PARA EL NEGOCIO 
+
+Responde como si fueras a presentarlo al Gerente de Compras. Define cada
+métrica, explícala en una línea y justifica por qué es la adecuada.
+
+B1. Riesgo de quedarse sin producto. ¿Qué combinaciones de SKU y bodega se
+    van a quedar sin inventario pronto? Entrega la lista priorizada y
+    explica cómo definiste "pronto".
+
+B2. Productos vitales. ¿Qué SKUs son los más importantes para el negocio y
+    cuánto inventario tienen? Usa la regla de clasificación que consideres
+    correcta y explica por qué.
+
+B3. Dinero detenido. ¿Qué mercadería ocupa bodega sin venderse y cuánto
+    dinero representa? Ordena por el valor en riesgo.
+
+B4. Rentabilidad. ¿Qué combinaciones de grupo de artículo y canal ganan más,
+    y en cuáles se pierde dinero? Indica qué resultados no son confiables y
+    por qué.
+
+B5. Recomendación. Con base en B1 a B4, da tres acciones concretas para la
+    próxima semana, cada una con el monto en GTQ que está en juego.
+
+Entregable: un notebook con los análisis y un resumen ejecutivo de una
+página (resumen_ejecutivo.pdf) para alguien no técnico. Cada número del
+resumen debe poder rastrearse en el notebook.
+
+
+5. PARTE C – MODELO PREDICTIVO DE QUIEBRE
+
+Predice qué combinaciones de SKU y bodega van a entrar en quiebre la semana
+siguiente al corte. SLC tiene las respuestas reales y calificará tu modelo
+con ellas.
+
+Qué se predice:
+riesgo_quiebre = 1 si, entre el 22 y el 28 de agosto, el stock total de ese
+SKU en esa bodega bajó algún día a la mitad o menos del que tenía el 21 de
+agosto (incluye agotarse). Solo puedes usar información disponible al
+cierre del 21 de agosto.
+
+Costo de equivocarse:
+  - No alertar un quiebre real (venta perdida):           Q1,500 por caso
+  - Alertar un quiebre que no ocurre (revisión innecesaria): Q150 por caso
+
+Lo que debes hacer:
+  1. Construye las variables del modelo a partir de ventas e inventario.
+     Explica cada una en una línea.
+  2. Entrena un modelo base simple (una regla de negocio o un modelo lineal)
+     y al menos un modelo de machine learning. Compáralos.
+  3. Explica cómo validaste el modelo y por qué ese esquema de validación es
+     el correcto para este problema.
+  4. Elige el umbral de alerta que minimiza el costo total y muestra cómo lo
+     calculaste.
+  5. Indica qué tan confiable es tu resultado y qué datos lo mejorarían.
+
+Entregable: predicciones.csv con una fila por cada id_combo de
+combos_a_predecir.csv y las columnas id_combo, probabilidad (de 0 a 1) y
+alerta (0 o 1). Un archivo con otro formato o con combinaciones faltantes
+pierde los puntos de esta parte.
+
+
+6. ENTREGA
+
+Entrega un repositorio Git (enlace de GitHub/GitLab o un ZIP que incluya la
+carpeta .git) dentro de las 48 horas. Se revisa el historial de commits:
+haz commits mientras avanzas.
+
+Estructura mínima:
+  README.md               Cómo ejecutar, supuestos y problemas de calidad
+                          encontrados
+  ventas.sql              Consulta de la Parte A1
+  respuestas_A.csv        Respuestas numéricas de la Parte A
+  Notebooks o scripts     Partes B y C, ejecutables de principio a fin
+  resumen_ejecutivo.pdf   Una página para el Gerente de Compras
+  predicciones.csv        Resultado de la Parte C
+  requirements.txt        Solo las librerías que usa tu código
+  USO_IA.md               Qué herramientas de IA usaste, para qué y qué
+                          corregiste
+
+
+
+
+
+8. ENTREVISTA 2 (45 minutos)
+
+Tu entrega se debate en vivo con el panel:
+  - 10 min: presentas tus hallazgos como si hablaras con el Gerente de Compras.
+  - 15 min: haces cambios a tu propio código en vivo.
+  - 10 min: preguntas sobre tus decisiones.
+  - 10 min: Preguntas sobre consultas SQL y su nivel.
+
+Ten tu entorno listo para ejecutar el código y compartir pantalla.
